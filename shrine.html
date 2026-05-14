@@ -2035,6 +2035,7 @@
   let dailyUsed = 0;
   let dailyLimit = parseInt(localStorage.getItem('shrine_daily_limit') || '0');
   let isAdmin = false;
+  const API_BASE = 'https://shrine-server-production-8e7d.up.railway.app';
 
   function authHeaders() {
     return { 'Content-Type': 'application/json', 'x-shrine-key': 'shrine_xk92mzp4' };
@@ -2048,7 +2049,7 @@
     const tbody = document.getElementById('codesBody');
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.2);padding:24px;">Loading...</td></tr>';
     try {
-      const res = await fetch('https://https://shrine-server-production-8e7d.up.railway.app/admin/codes', { headers: adminHeaders() });
+      const res = await fetch(`${API_BASE}/admin/codes`, { headers: adminHeaders() });
       const codes = await res.json();
       if (!Array.isArray(codes)) throw new Error('Bad response');
       if (codes.length === 0) {
@@ -2100,7 +2101,7 @@
     const msg = document.getElementById('createMsg');
     if (!code || !expires) { msg.style.color = '#e05555'; msg.textContent = 'Fill in code and expiry date'; return; }
     try {
-      const res = await fetch('https://https://shrine-server-production-8e7d.up.railway.app/admin/codes', {
+      const res = await fetch(`${API_BASE}/admin/codes`, {
         method: 'POST', headers: adminHeaders(),
         body: JSON.stringify({ code, tier, expires })
       });
@@ -2119,7 +2120,7 @@
   }
 
   async function adminToggle(code, active) {
-    await fetch(`https://https://shrine-server-production-8e7d.up.railway.app/admin/codes/${code}`, {
+    await fetch(`${API_BASE}/admin/codes/${code}`, {
       method: 'PATCH', headers: adminHeaders(),
       body: JSON.stringify({ active })
     });
@@ -2128,7 +2129,7 @@
 
   async function adminUpgrade(code, tier) {
     if (!tier) return;
-    await fetch(`https://https://shrine-server-production-8e7d.up.railway.app/admin/codes/${code}`, {
+    await fetch(`${API_BASE}/admin/codes/${code}`, {
       method: 'PATCH', headers: adminHeaders(),
       body: JSON.stringify({ tier })
     });
@@ -2136,7 +2137,7 @@
   }
 
   async function adminResetUsage(code) {
-    await fetch(`https://https://shrine-server-production-8e7d.up.railway.app/admin/reset/${code}`, {
+    await fetch(`${API_BASE}/admin/reset/${code}`, {
       method: 'POST', headers: adminHeaders()
     });
     loadCodes();
@@ -2144,7 +2145,7 @@
 
   async function adminDelete(code) {
     if (!confirm(`Delete ${code}? This cannot be undone.`)) return;
-    await fetch(`https://https://shrine-server-production-8e7d.up.railway.app/admin/codes/${code}`, {
+    await fetch(`${API_BASE}/admin/codes/${code}`, {
       method: 'DELETE', headers: adminHeaders()
     });
     loadCodes();
@@ -2156,7 +2157,7 @@
 
   async function adminLoginAs(code) {
     try {
-      const res = await fetch('https://https://shrine-server-production-8e7d.up.railway.app/admin/loginas', {
+      const res = await fetch(`${API_BASE}/admin/loginas`, {
         method: 'POST',
         headers: adminHeaders(),
         body: JSON.stringify({ code })
@@ -2201,7 +2202,7 @@
     input.classList.remove('error');
 
     try {
-      const res = await fetch('https://https://shrine-server-production-8e7d.up.railway.app/login', {
+      const res = await fetch(`${API_BASE}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
@@ -2274,7 +2275,7 @@
     startUsagePolling();
     updateModelDropdownForTier();
     // Fetch current usage
-    fetch('https://https://shrine-server-production-8e7d.up.railway.app/usage', {
+    fetch(`${API_BASE}/usage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-shrine-key': 'shrine_xk92mzp4' },
       body: JSON.stringify({ code: accessCode })
@@ -2285,7 +2286,7 @@
   function startUsagePolling() {
     if (userTier === 'admin') return;
     setInterval(() => {
-      fetch('https://https://shrine-server-production-8e7d.up.railway.app/usage', {
+      fetch(`${API_BASE}/usage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-shrine-key': 'shrine_xk92mzp4' },
         body: JSON.stringify({ code: accessCode })
@@ -2632,7 +2633,7 @@
         document.getElementById('newExpires').value = d.toISOString().split('T')[0];
       } else {
         // Validate session still works
-        fetch('https://https://shrine-server-production-8e7d.up.railway.app/usage', {
+        fetch(`${API_BASE}/usage`, {
           method: 'POST',
           headers: authHeaders(),
           body: JSON.stringify({ code: accessCode })
@@ -3133,7 +3134,7 @@
     let streamBubble = null;
 
     try {
-      const res = await fetch('https://https://shrine-server-production-8e7d.up.railway.app/chat', {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-shrine-key': 'shrine_xk92mzp4' },
         body: JSON.stringify({ model: selectedModel, messages: buildMessages(), webSearch: webSearchEnabled, reasoningEffort: selectedReasoningEffort, code: accessCode })
@@ -3205,7 +3206,7 @@
               saveConvo();
             }
             // Fetch real usage from server after response completes
-            fetch('https://https://shrine-server-production-8e7d.up.railway.app/usage', {
+            fetch(`${API_BASE}/usage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'x-shrine-key': 'shrine_xk92mzp4' },
               body: JSON.stringify({ code: accessCode })
@@ -3260,7 +3261,7 @@
     abortController = new AbortController();
 
     try {
-      const res = await fetch('https://https://shrine-server-production-8e7d.up.railway.app/chat', {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         signal: abortController.signal,
         headers: { 'Content-Type': 'application/json', 'x-shrine-key': 'shrine_xk92mzp4' },
@@ -3337,7 +3338,7 @@
     if (convoTitled) return;
     convoTitled = true;
     try {
-      const res = await fetch('https://https://shrine-server-production-8e7d.up.railway.app/chat', {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-shrine-key': 'shrine_xk92mzp4' },
         body: JSON.stringify({
@@ -3514,7 +3515,7 @@
     abortController = new AbortController();
 
     try {
-      const res = await fetch('https://https://shrine-server-production-8e7d.up.railway.app/chat', {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         signal: abortController.signal,
         headers: {
